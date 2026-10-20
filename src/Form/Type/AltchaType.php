@@ -32,6 +32,8 @@ class AltchaType extends AbstractType
         private readonly string $scriptUrl,
         #[Autowire(value: '%env(default::ALTCHA_AUTO)%')]
         private readonly ?string $auto = null,
+        #[Autowire(value: '%env(default::ALTCHA_DISPLAY)%')]
+        private readonly ?string $display = null,
         #[Autowire(value: '%env(default::ALTCHA_FLOATING)%')]
         private readonly ?string $floating = null,
     ) {}
@@ -40,11 +42,21 @@ class AltchaType extends AbstractType
     {
         // Skip route generation in sentinel mode — the sentinel URL is used directly.
         $localUrl = $this->altchaService->isSentinel() ? '' : $this->router->generate('altcha_challenge');
-        $view->vars['altcha_challenge_url'] = $this->altchaService->getChallengeUrl($localUrl);
+        $challengeUrl = $this->altchaService->getChallengeUrl($localUrl);
+
+        // In Sentinel mode, pass the display mode as a query parameter so Sentinel
+        // knows not to require code challenges when display=invisible.
+        if ($this->display !== null && $this->display !== '' && $this->altchaService->isSentinel()) {
+            $separator = str_contains($challengeUrl, '?') ? '&' : '?';
+            $challengeUrl .= $separator . 'display=' . urlencode($this->display);
+        }
+
+        $view->vars['altcha_challenge_url'] = $challengeUrl;
         $view->vars['altcha_hide_footer'] = $this->hideFooter;
         $view->vars['altcha_hide_logo'] = $this->hideLogo;
         $view->vars['altcha_script_url'] = $this->scriptUrl;
         $view->vars['altcha_auto'] = $this->auto;
+        $view->vars['altcha_display'] = $this->display;
         // Per-field option takes precedence; fall back to ALTCHA_FLOATING env var.
         // $options['floating'] is always set by the resolver (default null), so ?? triggers only when null.
         $view->vars['altcha_floating'] = $options['floating'] ?? $this->resolveFloating();

@@ -169,6 +169,7 @@ class AltchaService
     /**
      * Derives a verify URL from the sentinel challenge URL as a fallback.
      * e.g. https://eu.altcha.org/v1/challenge?apiKey=xxx -> https://eu.altcha.org/v1/verify/signature
+     *      https://eu.altcha.org (plain base URL)         -> https://eu.altcha.org/v1/verify/signature
      *
      * Only safe to call when isSentinel() is true (sentinelUrl is guaranteed non-empty).
      */
@@ -180,6 +181,16 @@ class AltchaService
             throw new \InvalidArgumentException('ALTCHA_SENTINEL_URL is not a valid absolute URL — check your environment configuration.');
         }
 
-        return sprintf('%s://%s/v1/verify/signature', $parsed['scheme'], $parsed['host']);
+        $path = $parsed['path'] ?? '';
+
+        // Derive the verify path from the challenge path by replacing /challenge with /verify/signature.
+        // Falls back to /v1/verify/signature for plain base URLs (no path).
+        if ($path !== '' && $path !== '/' && str_ends_with($path, '/challenge')) {
+            $verifyPath = substr($path, 0, -strlen('challenge')) . 'verify/signature';
+        } else {
+            $verifyPath = '/v1/verify/signature';
+        }
+
+        return sprintf('%s://%s%s', $parsed['scheme'], $parsed['host'], $verifyPath);
     }
 }

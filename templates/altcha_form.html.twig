@@ -1,9 +1,11 @@
 {% block altcha_widget %}
     {# auto: onload = solve on page load (invisible), onsubmit = solve on form submit, absent = manual checkbox (default). #}
+    {# display: invisible = fully hidden widget (no checkbox, no code challenges shown inline). #}
     <altcha-widget
         challenge="{{ altcha_challenge_url }}"
         name="{{ full_name }}"
         {% if altcha_auto %}auto="{{ altcha_auto }}"{% endif %}
+        {% if altcha_display %}display="{{ altcha_display }}"{% endif %}
         {% if altcha_floating %}floating{% endif %}
         {% if altcha_hide_footer %}hidefooter{% endif %}
         {% if altcha_hide_logo %}hidelogo{% endif %}>
