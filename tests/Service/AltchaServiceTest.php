@@ -161,11 +161,11 @@ class AltchaServiceTest extends TestCase
 
     public function testDeriveSentinelVerifyUrlBuildsCorrectUrl(): void
     {
-        $service = $this->makeService(sentinelUrl: 'https://eu.altcha.org/api/v1/challenge?apiKey=abc');
+        $service = $this->makeService(sentinelUrl: 'https://eu.altcha.org/v1/challenge?apiKey=abc');
         $method = new \ReflectionMethod($service, 'deriveSentinelVerifyUrl');
 
         $this->assertSame(
-            'https://eu.altcha.org/api/v1/verify/signature',
+            'https://eu.altcha.org/v1/verify/signature',
             $method->invoke($service),
         );
     }
@@ -173,11 +173,11 @@ class AltchaServiceTest extends TestCase
     public function testDeriveSentinelVerifyUrlStripsPortFromPath(): void
     {
         // Port is part of the host component — should not appear in the derived path
-        $service = $this->makeService(sentinelUrl: 'https://my-sentinel.example.com/api/v1/challenge?apiKey=abc');
+        $service = $this->makeService(sentinelUrl: 'https://my-sentinel.example.com/v1/challenge?apiKey=abc');
         $method = new \ReflectionMethod($service, 'deriveSentinelVerifyUrl');
 
         $this->assertSame(
-            'https://my-sentinel.example.com/api/v1/verify/signature',
+            'https://my-sentinel.example.com/v1/verify/signature',
             $method->invoke($service),
         );
     }
